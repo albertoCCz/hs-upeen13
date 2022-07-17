@@ -54,9 +54,27 @@ build (x:xs) = insert x (build xs)
 
 -- list with some logs to test with
 someLogs :: [LogMessage]
-someLogs = map parseMessage ["I 5053 pci_id: con ing!", "I 4681 ehci 0xf43d000:15: regista14: [0xbffff 0xfed nosabled 00-02] Zonseres: brips byted nored)", "W 3654 e8] PGTT ASF! 00f00000003.2: 0x000 - 0000: 00009dbfffec00000: Pround/f1743colled", "I 4076 verse.'", "I 4764 He trusts to you to set them free,", "I 858 your pocket?' he went on, turning to Alice.", "I 898 would be offended again."]
+someLogs = map parseMessage ["I 5053 pci_id: con ing!", "I 4681 ehci 0xf43d000:15: regista14: [0xbffff 0xfed nosabled 00-02] Zonseres: brips byted nored)", "W 3654 e8] PGTT ASF! 00f00000003.2: 0x000 - 0000: 00009dbfffec00000: Pround/f1743colled", "I 4076 verse.'", "I 4764 He trusts to you to set them free,", "I 858 your pocket?' he went on, turning to Alice.", "I 898 would be offended again.", "E 47 1034 'What a pity it wouldn't stay!' sighed the Lory, as soon as it was quite", "E 99 4219 Twenty seconds remaining until out-of-mustard condition"]
 
 -- sorted list by TimeStamp from sorted MessageTree
 inOrder :: MessageTree -> [LogMessage]
 inOrder Leaf = []
 inOrder (Node mt1 lm mt2) = (inOrder mt1) ++ [lm] ++ (inOrder mt2)
+
+-- get error messages with a severity of at least 50
+whatWentWrong :: [LogMessage] -> [String]
+whatWentWrong [] = []
+whatWentWrong x = map getMessage (filterRelevant (inOrder (build x)))
+       where
+              isRelevant :: LogMessage -> Bool
+              isRelevant (LogMessage (Error s) _ _) = if s > 50
+                                                      then True
+                                                      else False
+              isRelevant _                          = False
+                                                             
+              filterRelevant :: [LogMessage] -> [LogMessage]
+              filterRelevant = filter isRelevant
+       
+              getMessage :: LogMessage -> String
+              getMessage (LogMessage _ _ m) = m
+              getMessage (Unknown m)        = m -- this pattern should be unreacheble
