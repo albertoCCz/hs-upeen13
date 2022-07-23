@@ -15,8 +15,32 @@ module Golf where
 --       skips [1]          == [[1]]
 --       skips [True,False] == [[True,False], [False]]
 --       skips []           == []
+-- =========================================================
+-- How it works:
+-- 1. [[] | i <- []] : produces a list of lists.
+-- 2. We map (x !!) over each of these sublists.
+-- 3. For each sublist, we generate a value i from
+--    the list [i, 1, 2, ..., (length x) - 1].
+-- 4. For each value i, we generate a list where:
+--        4.1. The initial value is i.
+--        4.2. The step is 2*i + 1.
+--        4.3. The final value is always length x.
+--    This list is later use as one of the list of indexes.
+-- Example:
+--     x = "ABCD"
+--     skips x = [map ("ABCD" !!) [i,2*i+1..3] | i <- [0,1,2,3]] =
+--             = [map ("ABCD" !!) [0,2*0+1..3],
+--                map ("ABCD" !!) [1,2*1+1..3],
+--                map ("ABCD" !!) [2,2*2+1..3],
+--                map ("ABCD" !!) [3,2*3+1..3]] =
+--             = [map ("ABCD" !!) [0,1,2,3],
+--                map ("ABCD" !!) [1,3,],
+--                map ("ABCD" !!) [2],
+--                map ("ABCD" !!) [3]] =
+--             = [map ("ABCD" !!) [0,1,2,3],
+--                map ("ABCD" !!) [1,3],
+--                map ("ABCD" !!) [2],
+--                map ("ABCD" !!) [3]] =
+--             = ["ABCD", "BD", "C", "D"]
 skips :: [a] -> [[a]]
-skips x = [map (x !!) [i,2*i+1..lenL-1] | i <- [0..lenL-1]]
-    where
-        lenL :: Int
-        lenL = length x
+skips x = [map (x !!) [i,2*i+1..length x-1] | i <- [0..length x-1]]
