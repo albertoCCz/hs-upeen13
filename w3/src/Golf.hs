@@ -9,12 +9,12 @@ module Golf where
 --         second sublist is the second element of @x@, ...
 --       - the step between elements of sublists increments
 --         by one, starting at 1, for each sublist.
---   Examples:
---       skips "ABCD"       == ["ABCD", "BD", "C", "D"]
---       skips "hello!"     == ["hello!", "el!", "l!", "l", "o", "!"]
---       skips [1]          == [[1]]
---       skips [True,False] == [[True,False], [False]]
---       skips []           == []
+-- Examples:
+--     skips "ABCD"       == ["ABCD", "BD", "C", "D"]
+--     skips "hello!"     == ["hello!", "el!", "l!", "l", "o", "!"]
+--     skips [1]          == [[1]]
+--     skips [True,False] == [[True,False], [False]]
+--     skips []           == []
 -- =========================================================
 -- How it works:
 -- 1. [[] | i <- []] : produces a list of lists.
@@ -44,3 +44,27 @@ module Golf where
 --             = ["ABCD", "BD", "C", "D"]
 skips :: [a] -> [[a]]
 skips x = [map (x !!) [i,2*i+1..length x-1] | i <- [0..length x-1]]
+
+-- Exercise 2 Local maxima
+-- | @localMaxima x@ takes a list @x@ and returns a list whith
+--   the values in @x@ whose neighbours are lower.
+-- Examples:
+--     localMaxima [2,9,5,6,1] == [9,6]
+--     localMaxima [2,3,4,1,5] == [4]
+--     localMaxima [1,2,3,4,5] == []
+-- =========================================================
+-- How it works:
+-- It works recursively asking to the input list if it has at
+-- least three elements and if the central one is the bigger.
+-- Example:
+--     x = [2,9,5,6,1]
+--     localMaxima x = localMaxima (2:9:5:[6,1])   =
+--                   = 9 : localMaxima (9:5:[6,1]) =
+--                   = 9 : localMaxima (5:6:[1])   =
+--                   = 9 : 6 : localMaxima []      =
+--                   = 9 : 6 : [] = [9,6]
+localMaxima :: [Integer] -> [Integer]
+localMaxima (x:y:z:xs) = if (y > x) && (y > z)
+                         then y : localMaxima (y:z:xs)
+                         else localMaxima (y:z:xs)
+localMaxima _          = []
